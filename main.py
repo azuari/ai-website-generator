@@ -1,7 +1,7 @@
 from xml.parsers.expat import model
 
 from click import prompt
-from flask import Flask, render_template, request, Response
+from flask import Flask, render_template, request, Response, redirect
 import google.generativeai as genai
 import os
 from dotenv import load_dotenv
@@ -48,8 +48,11 @@ def generate_website_code(prompt):
 def index():
     return render_template('index.html')
 
-@app.route('/generate', methods=['POST'])
+@app.route('/generate', methods=['GET', 'POST'])
 def generate():
+    if request.method == 'GET':
+        return redirect('/')  # redirect ke homepage
+
     global generated_code, last_prompt
     prompt = request.form.get('prompt', '').strip()
 
