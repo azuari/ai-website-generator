@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Website Generator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 AI Website Generator</h1>
+            <p>Created by Programming with Abu Bakar</p>
+        </div>
+
+        <div class ="input-section">
+            {% if error %}
+            <div class="error-message">
+                <p>⚠️ {{ error }}</p>
+            </div>
+            {% endif %}
+
+        <form action="/generate" method="post" id="generateForm">
+            <div class="input-wrapper">
+                <input 
+                    type="text"
+                    name="prompt" 
+                    id="promptInput" 
+                    placeholder="e.g., Create a portfolio website for a photographer"
+                    autocomplete="off"
+                    required
+                >
+                <button type="submit" id="generateButton">Generate Website</button>
+            </div>
+        </form>
+
+        <div class="examples">
+            <p>Try these examples:</p>
+
+            <div class="examples-buttons">
+                <button class="example-btn" onclick="setPrompt('Create a portfolio website for a photographer')">Portfolio</button>
+                <button class="example-btn" onclick="setPrompt('Create a landing page for a coffee shop')">Coffee Shop</button>
+                <button class="example-btn" onclick="setPrompt('Create a resume website')">Resume</button>
+                <button class="example-btn" onclick="setPrompt('Create a product showcase page')">Product</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function setPrompt(text) {
+        document.getElementById('promptInput').value = text;
+    }
+
+    document.getElementById('generateForm').addEventListener('submit', function() {
+        const btn = document.getElementById('generateButton');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="loader"></span>Generating...';
+    });
+</script>
+</body>
+</html>

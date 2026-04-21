@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generated Website</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 AI Website Generator</h1>
+            <p>Your website is ready!</p>
+        </div>
+
+        <div class ="result-section">
+            <div class="result-header">
+                <div>
+                    <h2>Generated Website</h2>
+                    <p class="prompt-display">Prompt: "{{ prompt }}"</p>
+                </div>
+                <div class="button-group">
+                    <button onclick="copyCode()" class="action-btn" id="copyBtn">📄 Copy Code</button>
+                    <a href="/download" class="action-btn">💾 Download</a>
+                    <a href="/preview" target="_blank" class="action-btn">🔗Open in New Tab</a>
+                    <a href="/" class="action-btn new-btn">✨ New Website</a>
+                </div>
+            </div>
+
+            <div class ="preview-container">
+                <iframe src="/preview" frameborder="0"></iframe>
+            </div>
+        
+        </div class="code-section">
+            <div class ="code-header">
+                <h3>HTML Code</h3>
+                <button onclick="toggleCode()" class="toggle-btn" id="toggleBtn">Show Code</button>
+            </div>
+            <pre id="codeBlock" style="display: none;"><code id="codeContent">Click "Show Code" to view</code>
+            </pre>
+        </div>  
+        </div>
+        </div>
+        
+        <script>
+            let codeLoaded = false;
+
+            async function copyCode() {
+                const response = await fetch('/get-code');
+                const code = await response.text();
+
+                await navigator.clipboard.writeText(code);
+
+                const btn = document.getElementById('copyBtn');
+                btn.innerHTML = '✅ Copied!';
+                btn.style.backgroundColor = '#10b981';
+
+                setTimeout(() => {
+                    btn.innerHTML = '📄 Copy Code';
+                    btn.style.backgroundColor = '';
+                }, 2000);
+            }
+
+        async function toggleCode() {
+            const codeBlock = document.getElementById('codeBlock');
+            const toggleBtn = document.getElementById('toggleBtn');
+            
+            if (codeBlock.style.display === 'none') {
+                if (!codeLoaded) {
+                    const response = await fetch('/get-code');
+                    const code = await response.text();
+                    document.getElementById('codeContent').textContent = code;
+                    codeLoaded = true;
+                }
+                    codeBlock.style.display = 'block';
+                    toggleBtn.textContent = 'Hide Code';
+                } else {
+                    codeBlock.style.display = 'none';
+                    toggleBtn.textContent = 'Show Code';
+                }
+
+            }
+
+    </script>
+</body>
+</html>
