@@ -12,7 +12,7 @@ app = Flask(__name__)
 
 # configure Gemini API key
 genai.configure(api_key=os.environ.get('GEMINI_API_KEY'))
-print("API KEY:", os.environ.get("GEMINI_API_KEY"))    
+  
 model = genai.GenerativeModel('gemini-2.5-flash')
 
 generated_code = ""
