@@ -243,3 +243,69 @@ pre {
     padding: 10px;
     border-radius: 10px;
 }
+
+/* ========================= */
+/* MOBILE RESPONSIVE FIX */
+/* ========================= */
+
+@media (max-width: 768px) {
+
+    .container {
+        width: 95%;
+        padding: 20px;
+    }
+
+    .header h1 {
+        font-size: 28px;
+    }
+
+    .header p {
+        font-size: 14px;
+    }
+
+    /* Input jadi stack (atas bawah) */
+    .input-wrapper {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .input-wrapper input {
+        width: 100%;
+    }
+
+    .input-wrapper button {
+        width: 100%;
+    }
+
+    /* Example button */
+    .examples-buttons {
+        flex-direction: column;
+    }
+
+    .example-btn {
+        width: 100%;
+        text-align: center;
+    }
+
+    /* Result page */
+    .result-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .button-group {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .action-btn {
+        width: 100%;
+        text-align: center;
+    }
+
+    /* Preview */
+    .preview-container iframe {
+        height: 300px;
+    }
+}
