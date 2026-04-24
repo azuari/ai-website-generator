@@ -6,20 +6,27 @@
     <title>AI Website Generator</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
+
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🚀 AI Website Generator</h1>
-            <p>Created by Programming with Abu Bakar</p>
+
+<div class="container">
+
+    <!-- HEADER -->
+    <div class="header">
+        <h1>🚀 AI Website Generator</h1>
+        <p>Created by Programming with Abu Bakar</p>
+    </div>
+
+    <!-- INPUT SECTION -->
+    <div class="input-section">
+
+        {% if error %}
+        <div class="error-message">
+            <p>⚠️ {{ error }}</p>
         </div>
+        {% endif %}
 
-        <div class ="input-section">
-            {% if error %}
-            <div class="error-message">
-                <p>⚠️ {{ error }}</p>
-            </div>
-            {% endif %}
-
+        <!-- FORM -->
         <form action="/generate" method="post" id="generateForm">
             <div class="input-wrapper">
                 <input 
@@ -30,33 +37,62 @@
                     autocomplete="off"
                     required
                 >
-                <button type="submit" id="generateButton">Generate Website</button>
+
+                <button type="submit" id="generateButton">
+                    Generate Website
+                </button>
             </div>
         </form>
 
+        <!-- EXAMPLES -->
         <div class="examples">
             <p>Try these examples:</p>
 
             <div class="examples-buttons">
-                <button class="example-btn" onclick="setPrompt('Create a portfolio website for a photographer')">Portfolio</button>
-                <button class="example-btn" onclick="setPrompt('Create a landing page for a coffee shop')">Coffee Shop</button>
-                <button class="example-btn" onclick="setPrompt('Create a resume website')">Resume</button>
-                <button class="example-btn" onclick="setPrompt('Create a product showcase page')">Product</button>
+                <button type="button" class="example-btn" onclick="setPrompt('Create a portfolio website')">Portfolio</button>
+                <button type="button" class="example-btn" onclick="setPrompt('Create a coffee shop website')">Coffee Shop</button>
+                <button type="button" class="example-btn" onclick="setPrompt('Create a resume website')">Resume</button>
+                <button type="button" class="example-btn" onclick="setPrompt('Create a product showcase website')">Product</button>
             </div>
         </div>
+
     </div>
+
 </div>
 
+<!-- SCRIPT -->
 <script>
-    function setPrompt(text) {
-        document.getElementById('promptInput').value = text;
-    }
 
-    document.getElementById('generateForm').addEventListener('submit', function() {
-        const btn = document.getElementById('generateButton');
-        btn.disabled = true;
-        btn.innerHTML = '<span class="loader"></span>Generating...';
-    });
+function setPrompt(text) {
+    const input = document.getElementById('promptInput');
+    const btn = document.getElementById('generateButton');
+
+    input.value = text;
+
+    // Disable button + loading
+    btn.disabled = true;
+    btn.innerHTML = '<span class="loader"></span>Generating...';
+
+    // Auto submit
+    document.getElementById('generateForm').submit();
+}
+
+// FORM SUBMIT (manual typing)
+document.getElementById('generateForm').addEventListener('submit', function () {
+
+    const btn = document.getElementById('generateButton');
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="loader"></span>Generating...';
+
+    // Cooldown elak spam (429)
+    setTimeout(() => {
+        btn.disabled = false;
+        btn.innerHTML = 'Generate Website';
+    }, 15000);
+});
+
 </script>
+
 </body>
 </html>
