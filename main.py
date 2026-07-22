@@ -1,86 +1,221 @@
-from xml.parsers.expat import model
 
-from click import prompt
-from flask import Flask, render_template, request, Response, redirect
-import google.generativeai as genai
+import html
+
+from flask import (Flask, render_template, request, Response, session, redirect, url_for,)
 import os
-from dotenv import load_dotenv
+import time
+from app.core.config import *
+from app.database.database import init_db
+from app.services.website_generator import generate_website
+from app.helpers.validators import validate_prompt
+from app.services.history_service import (record_prompt, load_history, remove_history, remove_all_history, statistics, search, load_generated_html,)
+from app.services.export_service import (download_html, download_zip,)
 
-load_dotenv()
+# =========================
+# FLASK APP
+# =========================
 
 app = Flask(__name__)
 
-# configure Gemini API key
-genai.configure(api_key=os.environ.get('GEMINI_API_KEY'))
-  
-model = genai.GenerativeModel('gemini-2.5-flash')
+print("=" * 60)
+print(f"{APP_NAME} v{APP_VERSION}")
+print(f"Gemini Model : {GEMINI_MODEL}")
+print("=" * 60)
 
-generated_code = ""
-last_prompt = ""
+app.secret_key = SECRET_KEY
 
-def generate_website_code(prompt):
-    
-    enhanced_prompt = f"""
-    Create a complete, modern and responsive single HTML file for: {prompt}
+# Initialize database
+init_db()
 
-    Requirements:
-    1. All CSS must be in <style> tag within the HTML
-    2. All JavaScript must be in <script> tag within the HTML
-    3. Use modern CSS (Flexbox/Grid, animations, gradients)
-    4. Make it fully responsive (mobile-friendly)
-    5. Include beautiful color schemes and typography
-    6. Add smooth animations and transitions
-    7. Make it professional and visually appealing
-    8. Include relevant content (you can use placeholder text/images)
 
-    Return ONLY the complete HTML code, nothing else. No explanations, no markdown code blocks.
-    Start directly with the <!DOCTYPE html>
-    """
-    try:
-        response = model.generate_content(enhanced_prompt)
-        code = response.text
-        code = code.replace('```html','').replace('```','').strip()
-        return code
-         
-    except Exception as e:
-        return f"<html><h1>Error: {str(e)}</h1></html>"
+# ==========================================================
+# ROUTES
+# ==========================================================
 
-@app.route('/')
+@app.route("/")
 def index():
-    return render_template('index.html')
+    return render_template("index.html")
 
-@app.route('/generate', methods=['GET', 'POST'])
+
+@app.route("/generate", methods=["POST"])
 def generate():
-    if request.method == 'GET':
-        return redirect('/')  # redirect ke homepage
 
-    global generated_code, last_prompt
-    prompt = request.form.get('prompt', '').strip()
+    try:
 
-    if not prompt:
-        return render_template('index.html', error="please enter a prompt")
+        prompt = validate_prompt(
+            request.form.get("prompt", "")
+        )
 
-    last_prompt = prompt
-    generated_code = generate_website_code(prompt)
-    return render_template('result.html', prompt=last_prompt)
+    except ValueError as e:
 
-@app.route('/preview')
-def preview():
-    return generated_code
+        return render_template(
+            "index.html",
+            error=str(e)
+        )
 
-@app.route('/download')
-def download():
-    return Response(
-        generated_code,
-        mimetype='text/html',
-        headers={'Content-Disposition': 'attachment; filename=generated_website.html'}
+    # ==========================
+    # Start Timer
+    # ==========================
+
+    start = time.perf_counter()
+
+    # ==========================
+    # Generate Website
+    # ==========================
+
+    generated_code = generate_website(prompt)
+
+    # ==========================
+    # Calculate Duration
+    # ==========================
+
+    duration = round(
+        time.perf_counter() - start,
+        2
     )
 
-@app.route('/get-code')
-def get_code():
-    return generated_code, 200, {'Content-Type': 'text/plain'}
+    # ==========================
+    # HTML Size
+    # ==========================
 
-if __name__ == '__main__':
-    import os
+    html_size = len(
+        generated_code.encode("utf-8")
+    )
+
+    # ==========================
+    # Save History
+    # ==========================
+
+    history_id = record_prompt(
+
+        prompt=prompt,
+
+        status="SUCCESS",
+
+        duration=duration,
+
+        html_size=html_size,
+
+        generated_html=generated_code,
+        
+    )
+
+    # ==========================
+    # Save Session
+    # ==========================
+
+    session["last_history_id"] = history_id
+
+    session["last_prompt"] = prompt
+
+    # ==========================
+    # Show Result
+    # ==========================
+
+    return render_template(
+
+        "result.html",
+
+        prompt=prompt
+
+    )
+
+@app.route("/preview")
+def preview():
+
+    history_id = session.get("last_history_id")
+
+    html = load_generated_html(history_id)
+
+    return Response(
+        html or "",
+        mimetype="text/html"
+    )
+
+
+@app.route("/download")
+def download():
+
+    history_id = session.get("last_history_id")
+    html = load_generated_html(history_id)
+    return download_html(html or "")
+
+@app.route("/download-zip")
+def download_zip_file():
+    
+    history_id = session.get("last_history_id")
+    html = load_generated_html(history_id)
+    return download_zip(html or "")
+
+
+@app.route("/get-code")
+def get_code():
+    history_id = session.get("last_history_id")
+
+    if not history_id:
+        return Response("", mimetype="text/html")
+
+    html = load_generated_html(history_id)
+
+    return Response(
+        html or "",
+        mimetype="text/html"
+)
+
+
+
+@app.route("/history")
+def history():
+
+    history_data = load_history()
+
+    stats = statistics()
+
+    return render_template(
+        "history.html",
+        history=history_data,
+        stats=stats
+    )
+
+@app.route("/history/search")
+def search_history():
+
+    keyword = request.args.get("q", "").strip()
+
+    history_data = search(keyword)
+
+    stats = statistics()
+
+    return render_template(
+        "history.html",
+        history=history_data,
+        stats=stats
+    )
+
+@app.route("/history/delete/<int:history_id>")
+def delete_history_route(history_id):
+
+    remove_history(history_id)
+
+    return redirect(url_for("history"))
+
+@app.route("/history/clear")
+def clear_history_route():
+
+    remove_all_history()
+
+    return redirect(url_for("history"))
+
+# ==========================================================
+# RUN APP
+# ==========================================================
+
+if __name__ == "__main__":
+
     port = int(os.environ.get("PORT", 10000))
-    app.run(host='0.0.0.0', port=port)
+
+    app.run(
+        host="0.0.0.0",
+        port=port,
+        debug=True
+    )

@@ -6,93 +6,167 @@
     <title>AI Website Generator</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-
 <body>
 
 <div class="container">
 
-    <!-- HEADER -->
     <div class="header">
-        <h1>🚀 AI Website Generator</h1>
-        <p>Created by Programming with Abu Bakar</p>
+
+    <div class="hero-icon">
+        🚀
     </div>
 
-    <!-- INPUT SECTION -->
-    <div class="input-section">
+    <h1>AI Website Generator</h1>
 
-        {% if error %}
-        <div class="error-message">
-            <p>⚠️ {{ error }}</p>
-        </div>
-        {% endif %}
+    <h3>Create Professional Websites with AI</h3>
 
-        <!-- FORM -->
-        <form action="/generate" method="post" id="generateForm">
-            <div class="input-wrapper">
-                <input 
-                    type="text"
-                    name="prompt" 
-                    id="promptInput" 
-                    placeholder="e.g., Create a portfolio website for a photographer"
-                    autocomplete="off"
-                    required
-                >
+    <p>
+        Powered by Google Gemini AI
+    </p>
 
-                <button type="submit" id="generateButton">
-                    Generate Website
-                </button>
-            </div>
-        </form>
+    <div class="hero-badges">
 
-        <!-- EXAMPLES -->
-        <div class="examples">
-            <p>Try these examples:</p>
+        <span>⚡ Fast</span>
 
-            <div class="examples-buttons">
-                <button type="button" class="example-btn" onclick="setPrompt('Create a portfolio website')">Portfolio</button>
-                <button type="button" class="example-btn" onclick="setPrompt('Create a coffee shop website')">Coffee Shop</button>
-                <button type="button" class="example-btn" onclick="setPrompt('Create a resume website')">Resume</button>
-                <button type="button" class="example-btn" onclick="setPrompt('Create a product showcase website')">Product</button>
-            </div>
-        </div>
+        <span>🎨 Modern</span>
+
+        <span>📱 Responsive</span>
+
+        <span>🤖 AI Powered</span>
 
     </div>
 
 </div>
 
-<!-- SCRIPT -->
+    <div class="input-section">
+
+        {% if error %}
+        <div class="error-message">
+            ⚠️ {{ error }}
+        </div>
+        {% endif %}
+
+        <form action="/generate" method="post" id="generateForm">
+
+            <h3 class="section-title">
+
+                📝 Describe Your Website
+
+            </h3>
+
+                <p class="section-subtitle">
+
+                Be as detailed as possible for the best AI-generated results.
+
+                </p>
+
+            <textarea
+                name="prompt"
+                id="promptInput"
+                aria-label="Website Prompt"
+                placeholder="Describe the website you want to create..."
+                required
+            ></textarea>
+
+            <button type="submit" id="generateButton" class="btn btn-primary w-100" title="Generate a complete website using Google Gemini AI">
+                🚀 Generate Website with AI
+            </button>
+
+        </form>
+
+        <div class="examples">
+            <p>💡 Example Prompts</p>
+
+            <div class="examples-buttons">
+                <button type="button" class="example-btn" onclick="setPrompt('Create a modern portfolio website for a photographer')">Portfolio</button>
+
+                <button type="button" class="example-btn" onclick="setPrompt('Create a futuristic AI SaaS landing page')">AI SaaS</button>
+
+                <button type="button" class="example-btn" onclick="setPrompt('Create a coffee shop website with menu and booking')">Coffee Shop</button>
+
+                <button type="button" class="example-btn" onclick="setPrompt('Create a luxury real estate website')">Real Estate</button>
+            </div>
+        </div>
+
+        <div class="extra-links">
+            <a href="/history" class="action-btn" title="Open the website generation history">
+                📜 History Dashboard
+            </a>
+        </div>
+
+    </div>
+
+</div>
+<div id="loadingOverlay" class="loading-overlay">
+
+    <div class="loading-box">
+
+        <div class="spinner"></div>
+
+       <h3>
+
+        🚀 Generating Your Website...
+
+       </h3>
+
+        <p>
+
+        Google Gemini AI is building your website.
+
+        </p>
+
+        <small>
+
+        This usually takes only a few seconds.
+
+        </small>
+
+    </div>
+</div>
+<footer class="footer">
+
+    <p>
+
+        AI Website Generator v1.0
+
+    </p>
+
+    <small>
+
+        Powered by Flask • Google Gemini AI • Python
+
+    </small>
+
+</footer>
 <script>
 
 function setPrompt(text) {
-    const input = document.getElementById('promptInput');
-    const btn = document.getElementById('generateButton');
-
-    input.value = text;
-
-    // Disable button + loading
-    btn.disabled = true;
-    btn.innerHTML = '<span class="loader"></span>Generating...';
-
-    // Auto submit
-    document.getElementById('generateForm').submit();
+    document.getElementById('promptInput').value = text;
 }
 
-// FORM SUBMIT (manual typing)
-document.getElementById('generateForm').addEventListener('submit', function () {
+// Ambil semua elemen
+const form = document.getElementById("generateForm");
+const btn = document.getElementById("generateButton");
+const overlay = document.getElementById("loadingOverlay");
 
-    const btn = document.getElementById('generateButton');
+// Apabila borang dihantar
+form.addEventListener("submit", ()=> {
 
+    // Paparkan Loading Screen
+    overlay.style.display = "flex";
+    document.body.style.overflow = "hidden";
+
+    // Disable Button
     btn.disabled = true;
-    btn.innerHTML = '<span class="loader"></span>Generating...';
 
-    // Cooldown elak spam (429)
-    setTimeout(() => {
-        btn.disabled = false;
-        btn.innerHTML = 'Generate Website';
-    }, 15000);
+    // Tukar tulisan button
+    btn.innerHTML = `
+        <span class="loader"></span>
+        Generating...
+    `;
+
 });
 
 </script>
-
 </body>
 </html>

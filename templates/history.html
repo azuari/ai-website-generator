@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prompt History</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="container">
+
+    <div class="header">
+       <h1>📜 Website Generation History</h1>
+
+        <p class="history-subtitle">
+
+        Review all AI-generated websites.
+
+        </p>
+
+        <div style="margin-top:15px;">
+
+        <a href="/history/clear"
+           class="action-btn"
+           onclick="return confirm('Are you sure you want to clear all history?')">
+
+            🗑 Clear History
+
+        </a>
+
+        <a href="/" class="action-btn">
+
+            🏠 Home
+
+        </a>
+
+    </div>
+
+    </div>
+
+    <!-- Statistics Dashboard -->
+
+<div class="stats-container">
+
+    <div class="stat-card">
+        <h3>Total Records</h3>
+        <p>{{ stats.total }}</p>
+    </div>
+
+    <div class="stat-card">
+        <h3>Average Time</h3>
+        <p>{{ stats.avg_duration }} s</p>
+    </div>
+
+    <div class="stat-card">
+        <h3>Average Size</h3>
+        <p>{{ stats.avg_size }} Bytes</p>
+    </div>
+
+    <div class="stat-card">
+        <h3>Latest Record</h3>
+        <p>{{ stats.latest }}</p>
+    </div>
+
+</div>
+
+<!-- Search Form -->
+
+<div class="search-container">
+
+    <form action="/history/search" method="GET">
+
+        <input
+            type="text"
+            name="q"
+            placeholder="🔍 Search prompt..."
+            class="search-input"
+            autofocus
+        >
+
+        <button type="submit" class="action-btn">
+            🔍 Search
+        </button>
+
+    </form>
+
+</div>
+
+    <div class="table-container">
+        {% if history %}
+    <table class="history-table">
+
+        <thead>
+
+            <tr>
+                <th>ID</th>
+                <th>Model</th>
+                <th>Status</th>
+                <th>Time (s)</th>
+                <th>Size (Bytes)</th>
+                <th>Prompt</th>
+                <th>Date</th>
+                <th>Action</th>
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+        {% for item in history %}
+
+            <tr>
+
+                <td>{{ item[0] }}</td>
+
+                <td>{{ item[2] }}</td>
+
+                <td>
+
+                    {% if item[3] == "SUCCESS" %}
+
+                        <span class="badge-success">
+                            ✅ SUCCESS
+                        </span>
+
+                    {% else %}
+
+                        <span class="badge-error">
+                            ❌ ERROR
+                        </span>
+
+                    {% endif %}
+
+                </td>
+
+                <td>{{ item[4] }}</td>
+
+                <td>{{ item[5] }}</td>
+
+                <td>{{ item[1] }}</td>
+
+                <td>{{ item[6] }}</td>
+
+                <td>
+
+                    <a href="/history/delete/{{ item[0] }}"
+                        class="delete-btn"
+                        onclick="return confirm('Delete this record?')">
+
+                        🗑 Delete
+
+                    </a>
+
+                </td>
+
+            </tr>
+
+        {% endfor %}
+
+        </tbody>
+
+    </table>
+    {% else %}
+
+<div class="empty-history">
+
+    <h2>📭 No Website History Yet</h2>
+
+    <p>Generate your first website to begin building your history.</p>
+
+</div>
+
+{% endif %}
+
+</div>
+
+</div>
+<footer class="footer">
+
+    <p>
+
+        AI Website Generator v1.0
+
+    </p>
+
+    <small>
+
+        Powered by Flask • Google Gemini AI • Python
+
+    </small>
+
+</footer>
+</body>
+</html>
