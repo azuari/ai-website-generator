@@ -6,6 +6,7 @@ AI Website Generator v1.0 RC2
 """
 
 import time
+
 from google import genai
 from google.genai.errors import ClientError
 
@@ -30,40 +31,79 @@ client = genai.Client(api_key=GEMINI_API_KEY)
 
 def generate_with_gemini(prompt):
 
-    class DummyResponse:
-        text = """
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Dummy Test</title>
+    models = [GEMINI_MODEL] + FALLBACK_MODELS
 
-    <style>
-        body{
-            font-family: Arial, sans-serif;
-            text-align:center;
-            margin-top:100px;
-            background:#f5f5f5;
-        }
+    last_error = None
 
-        h1{
-            color:#0d6efd;
-        }
-    </style>
-</head>
+    for model in models:
 
-<body>
+        print("=" * 60)
+        print(f"Trying model : {model}")
+        print("=" * 60)
 
-<h1>AI Website Generator</h1>
+        for attempt in range(MAX_RETRY):
 
-<h2>Dummy Response Berjaya!</h2>
+            try:
 
-<p>Flask ✔</p>
-<p>Render ✔</p>
-<p>Database ✔</p>
+                response = client.models.generate_content(
+                    model=model,
+                    contents=prompt
+                )
 
-</body>
-</html>
-"""
+                if (
+                    response
+                    and hasattr(response, "text")
+                    and response.text
+                ):
 
-    return DummyResponse()
+                    print(f"SUCCESS : {model}")
+
+                    return response
+
+                print("Empty response received.")
+
+                break
+
+            except ClientError as e:
+
+                last_error = e
+
+                error = str(e)
+
+                print(error)
+
+                # 503 = Busy
+                if "503" in error or "UNAVAILABLE" in error:
+
+                    print(
+                        f"{model} busy..."
+                        f" retry {attempt+1}/{MAX_RETRY}"
+                    )
+
+                    time.sleep(RETRY_DELAY)
+
+                    continue
+
+                # 429 = Quota
+                if "429" in error:
+
+                    print("Quota exceeded.")
+
+                    break
+
+                # other client error
+
+                break
+
+            except Exception as e:
+
+                last_error = e
+
+                print(f"Unexpected Error : {e}")
+
+                break
+
+    raise RuntimeError(
+        "Gemini AI sedang sibuk. "
+        "Sila cuba semula dalam beberapa minit."
+    ) from last_error

@@ -63,7 +63,16 @@ def generate():
     # Generate Website
     # ==========================
 
-    generated_code = generate_website(prompt)
+    try:
+
+        generated_code = generate_website(prompt)
+
+    except Exception as e:
+
+        return render_template(
+        "index.html",
+        error=str(e)
+        )
 
     # ==========================
     # Calculate Duration
