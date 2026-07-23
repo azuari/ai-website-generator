@@ -6,7 +6,6 @@ AI Website Generator v1.0 RC2
 """
 
 import time
-from urllib import response
 from google import genai
 from google.genai.errors import ClientError
 
@@ -30,67 +29,41 @@ client = genai.Client(api_key=GEMINI_API_KEY)
 # ==========================================================
 
 def generate_with_gemini(prompt):
-    """
-    Generate content using Gemini with
-    retry and fallback models.
-    """
 
-    models = [GEMINI_MODEL] + FALLBACK_MODELS
+    class DummyResponse:
+        text = """
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Dummy Test</title>
 
-    last_error = None
+    <style>
+        body{
+            font-family: Arial, sans-serif;
+            text-align:center;
+            margin-top:100px;
+            background:#f5f5f5;
+        }
 
-    for model in models:
+        h1{
+            color:#0d6efd;
+        }
+    </style>
+</head>
 
-        print(f"\nTrying model: {model}")
+<body>
 
-        for attempt in range(MAX_RETRY):
+<h1>AI Website Generator</h1>
 
-            try:
+<h2>Dummy Response Berjaya!</h2>
 
-                response = client.models.generate_content(
-                    model=model,
-                    contents=prompt
-                )
+<p>Flask ✔</p>
+<p>Render ✔</p>
+<p>Database ✔</p>
 
-                print("=" * 60)
-                print(response)
-                print("=" * 60)
-                
-                print(f"SUCCESS using {model}")
+</body>
+</html>
+"""
 
-                return response
-
-            except ClientError as e:
-
-                last_error = e
-                error_text = str(e)
-
-                # 503 - Model Busy
-                if "503" in error_text or "UNAVAILABLE" in error_text:
-
-                    print(
-                        f"{model} busy "
-                        f"(Attempt {attempt+1}/{MAX_RETRY})"
-                    )
-
-                    time.sleep(RETRY_DELAY)
-                    continue
-
-                # 429 - Quota
-                elif "429" in error_text:
-
-                    print(f"Quota exceeded for {model}")
-                    break
-
-                else:
-
-                    print(error_text)
-                    break
-
-            except Exception as e:
-
-                last_error = e
-                print(e)
-                break
-
-    raise last_error
+    return DummyResponse()

@@ -35,18 +35,17 @@ if not SECRET_KEY:
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-GEMINI_MODEL = "gemini-2.5-flash"
+GEMINI_MODEL = "gemini-2.5-flash-lite"
 
 FALLBACK_MODELS = [
-    "gemini-flash-latest",
-    "gemini-2.5-flash-lite"
+    "gemini-2.5-flash"
 ]
 
 # ==========================================================
 # RETRY
 # ==========================================================
 
-MAX_RETRY = 3
+MAX_RETRY = 1
 
 RETRY_DELAY = 2
 
